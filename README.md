@@ -3,7 +3,7 @@
 ////// DATA PROCESSING STEP //////
 Preprocessed data gotten from: http://preprocessed-connectomes-project.org/adhd200/
 
-./scripts/download_adhd200.py accesses the open source pre-processed (noise from MRI scan like skull, head movement, heartbeat removed) data from the ADHD200 from the Amazon S3 bucket. 
+./scripts/download_adhd200.py accesses the open source pre-processed (noise from MRI scan like skull, head movement, heartbeat removed) data from the ADHD200 from the Amazon S3 bucket. Essentially takes 4d MRI scan of the brain over time, normalizes brain size, and extracts useful statistical values from each spatial point in brain. 
 
 ./scripts/run_downloads.sh bash script that runs the download and puts it in our data directory
 
