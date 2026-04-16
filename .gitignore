@@ -1,0 +1,47 @@
+# =========================
+# 1. Data Directories
+# =========================
+# Ignore everything inside the data folder (NIfTI files are too large for GitHub)
+data/*
+# BUT do not ignore the .gitkeep files, so the folder structure is preserved
+!data/**/.gitkeep
+
+# =========================
+# 2. PyTorch & Model Weights
+# =========================
+# Ignore saved model weights and checkpoints
+*.pt
+*.pth
+*.ckpt
+models/saved_weights/
+runs/
+
+# =========================
+# 3. Python & Environments
+# =========================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# =========================
+# 4. Jupyter Notebooks
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# 5. OS Generated Files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
