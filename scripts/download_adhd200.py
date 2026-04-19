@@ -1,269 +1,228 @@
-# download_adhd200.py
-#
-# Author: Daniel Clark, 2015
-# Updated to python 3 and to support downloading by DX, Cameron Craddock, 2019
-# Adapted for ADHD-200, 2026
-# from https://github.com/preprocessed-connectomes-project/abide/blob/master/download_abide_preproc.py 
-
 """
-This script downloads data from the Preprocessed Connectomes Project's
-ADHD-200 Preprocessed data release and stores the files in a local
-directory; users specify derivative, pipeline, strategy, and optionally
-age ranges, sex, site of interest
+download_adhd200.py
+
+Downloads fALFF, ReHo, and GM probability maps from the ADHD-200 CPAC pipeline
+on the FCP-INDI S3 bucket, along with merged phenotypic labels.
 
 Usage:
-    python download_adhd200.py -d <derivative> -p <pipeline>
-                                     -s <strategy> -o <out_dir>
-                                     [-lt <less_than>] [-gt <greater_than>]
-                                     [-x <sex>] [-t <site>]
+    python download_adhd200.py -o <out_dir> [-t <site>] [-x <sex>]
+                               [--adhd-only] [--tdc-only]
+
+Output layout:
+    <out_dir>/
+        phenotypic.csv              merged labels for all downloaded subjects
+        <subject_id>/
+            falff.nii.gz
+            reho.nii.gz
+            gm.nii.gz
 """
 
-# Main collect and download function
-def collect_and_download(derivative, pipeline, strategy, out_dir, less_than, greater_than, site, sex, diagnosis):
-    """
-    Function to collect and download images from the ADHD-200 preprocessed
-    directory on FCP-INDI's S3 bucket
+import argparse
+import io
+import os
+import urllib.request
 
-    Parameters
-    ----------
-    derivative : string
-        derivative or measure of interest
-    pipeline : string
-        pipeline used to process data of interest
-    strategy : string
-        noise removal strategy used to process data of interest
-    out_dir : string
-        filepath to a local directory to save files to
-    less_than : float
-        upper age (years) threshold for participants of interest
-    greater_than : float
-        lower age (years) threshold for participants of interest
-    site : string
-        acquisition site of interest
-    sex : string
-        'M' or 'F' to indicate whether to download male or female data
-    diagnosis : string
-        'asd', 'tdc', or 'both' corresponding to the diagnosis of the
-        participants for whom data should be downloaded
+import pandas as pd
 
-    Returns
-    -------
-    None
-        this function does not return a value; it downloads data from
-        S3 to a local directory
-    """
+S3_BASE = "https://s3.amazonaws.com/fcp-indi/data/Projects/ADHD200"
+CPAC_BASE = f"{S3_BASE}/Outputs/cpac/raw_outputs/pipeline_adhd200-benchmark"
 
-    # Import packages
-    import os
-    import urllib.request as request
+# Per-site phenotypic CSV URLs (raw ADHD-200 release)
+PHENO_SITE_URLS = {
+    "NYU":        f"{S3_BASE}/RawData/NYU_phenotypic.csv",
+    "KKI":        f"{S3_BASE}/RawData/KKI_phenotypic.csv",
+    "Peking_1":   f"{S3_BASE}/RawData/Peking_1_phenotypic.csv",
+    "OHSU":       f"{S3_BASE}/RawData/OHSU_phenotypic.csv",
+    "NeuroIMAGE": f"{S3_BASE}/RawData/NeuroIMAGE_phenotypic.csv",
+    "Pittsburgh": f"{S3_BASE}/RawData/Pittsburgh_phenotypic.csv",
+}
 
-    # Init variables
-    mean_fd_thresh = 0.2
-    
-    # CHANGED TO ADHD200
-    s3_prefix = 'https://s3.amazonaws.com/fcp-indi/data/Projects/'\
-                'ADHD200'
-    s3_pheno_path = '/'.join([s3_prefix, 'ADHD200_phenotypic_preprocessed.csv'])
+# CPAC derivative sub-paths relative to <subject>_session_1/
+# Prefer global1 (global signal regression); fall back to global0 if absent.
+_SELECTOR_G1 = (
+    "/_compcor_ncomponents_5_selector_pc10.linear1.wm0.global1"
+    ".motion1.quadratic1.gm0.compcor1.csf0"
+)
+_SELECTOR_G0 = (
+    "/_compcor_ncomponents_5_selector_pc10.linear1.wm0.global0"
+    ".motion1.quadratic1.gm0.compcor1.csf0"
+)
+_FALFF_STEM = (
+    "falff_to_standard/_scan_rest_1"
+    "/_csf_threshold_0.96/_gm_threshold_0.7/_wm_threshold_0.96"
+)
+_REHO_STEM = (
+    "reho_to_standard/_scan_rest_1"
+    "/_csf_threshold_0.96/_gm_threshold_0.7/_wm_threshold_0.96"
+)
 
-    # Format input arguments to be lower case, if not already
-    derivative = derivative.lower()
-    pipeline = pipeline.lower()
-    strategy = strategy.lower()
+FALFF_SUBPATHS = [
+    f"{_FALFF_STEM}{_SELECTOR_G1}/_hp_0.01/_lp_0.1/rest_calc_tshift_resample_volreg_mask_calc_antswarp.nii.gz",
+    f"{_FALFF_STEM}{_SELECTOR_G0}/_hp_0.01/_lp_0.1/rest_calc_tshift_resample_volreg_mask_calc_antswarp.nii.gz",
+]
+REHO_SUBPATHS = [
+    f"{_REHO_STEM}{_SELECTOR_G1}/ReHo_antswarp.nii.gz",
+    f"{_REHO_STEM}{_SELECTOR_G0}/ReHo_antswarp.nii.gz",
+]
+GM_SUBPATH = "seg_probability_maps/segment_prob_1.nii.gz"
 
-    # Check derivative for extension
-    if 'roi' in derivative:
-        extension = '.1D'
-    else:
-        extension = '.nii.gz'
+DERIVATIVES = {
+    "falff": FALFF_SUBPATHS,
+    "reho":  REHO_SUBPATHS,
+    "gm":    [GM_SUBPATH],
+}
 
-    # If output path doesn't exist, create it
-    if not os.path.exists(out_dir):
-        print('Could not find {0}, creating now...'.format(out_dir))
-        os.makedirs(out_dir)
+# DX column: 0=TDC, 1=ADHD-Combined, 2=ADHD-Hyperactive, 3=ADHD-Inattentive
+TDC_DX  = 0
+ADHD_DX = {1, 2, 3}
 
-    # Load the phenotype file from S3
-    s3_pheno_file = request.urlopen(s3_pheno_path)
-    pheno_list = s3_pheno_file.readlines()
-    print(pheno_list[0])
 
-    # Get header indices
-    header = pheno_list[0].decode().split(',')
-    try:
-        site_idx = header.index('SITE_ID')
-        file_idx = header.index('FILE_ID')
-        age_idx = header.index('AGE_AT_SCAN')
-        sex_idx = header.index('SEX')
-        dx_idx = header.index('DX_GROUP')
-        mean_fd_idx = header.index('func_mean_fd')
-    except Exception as exc:
-        err_msg = 'Unable to extract header information from the pheno file: {0}\nHeader should have pheno info:' \
-                  ' {1}\nError: {2}'.format(s3_pheno_path, str(header), exc)
-        raise Exception(err_msg)
-
-    # Go through pheno file and build download paths
-    print('Collecting images of interest...')
-    s3_paths = []
-    for pheno_row in pheno_list[1:]:
-
-        # Comma separate the row
-        cs_row = pheno_row.decode().split(',')
-
+def load_phenotypic(site_filter=None, sex_filter=None,
+                    adhd_only=False, tdc_only=False):
+    """Download and merge per-site phenotypic CSVs. Returns a DataFrame."""
+    frames = []
+    for site, url in PHENO_SITE_URLS.items():
+        if site_filter and site.lower() != site_filter.lower():
+            continue
         try:
-            # See if it was preprocessed
-            row_file_id = cs_row[file_idx]
-            # Read in participant info
-            row_site = cs_row[site_idx]
-            row_age = float(cs_row[age_idx])
-            row_sex = cs_row[sex_idx]
-            row_dx = cs_row[dx_idx]
-            row_mean_fd = float(cs_row[mean_fd_idx])
+            raw = urllib.request.urlopen(url).read().decode()
+            df = pd.read_csv(io.StringIO(raw))
+            df["SITE"] = site
+            frames.append(df)
         except Exception as e:
-            err_msg = 'Error extracting info from phenotypic file, skipping...'
-            print(err_msg)
-            continue
+            print(f"Warning: could not load phenotypic for {site}: {e}")
 
-        # If the filename isn't specified, skip
-        if row_file_id == 'no_filename':
-            continue
-        # If mean fd is too large, skip
-        if row_mean_fd >= mean_fd_thresh:
-            continue
+    if not frames:
+        raise RuntimeError("No phenotypic data loaded.")
 
-        # Test phenotypic criteria (three if's looks cleaner than one long if)
-        # Test sex
-        if (sex == 'M' and row_sex != '1') or (sex == 'F' and row_sex != '2'):
-            continue
+    pheno = pd.concat(frames, ignore_index=True)
+    pheno = pheno.rename(columns={
+        "ScanDir ID": "subject_id",
+        "Gender":     "sex",       # 0=female, 1=male
+        "Age":        "age",
+        "DX":         "dx",
+        "QC_Rest_1":  "qc_rest",
+    })
+    pheno["subject_id"] = pheno["subject_id"].astype(str).str.zfill(7)
+    pheno["dx"]       = pd.to_numeric(pheno["dx"],       errors="coerce")
+    pheno["qc_rest"]  = pd.to_numeric(pheno["qc_rest"],  errors="coerce")
 
-        if (diagnosis == 'asd' and row_dx != '1') or (diagnosis == 'tdc' and row_dx != '2'):
-            continue
+    # Quality filter: keep only subjects with good resting-state QC
+    pheno = pheno[pheno["qc_rest"] == 1]
 
-        # Test site
-        if site is not None and site.lower() != row_site.lower():
-            continue
-        # Test age range
-        if greater_than < row_age < less_than:
-            filename = row_file_id + '_' + derivative + extension
-            s3_path = '/'.join([s3_prefix, 'Outputs', pipeline, strategy, derivative, filename])
-            print('Adding {0} to download queue...'.format(s3_path))
-            s3_paths.append(s3_path)
-        else:
-            continue
+    # Diagnosis filter
+    if adhd_only:
+        pheno = pheno[pheno["dx"].isin(ADHD_DX)]
+    elif tdc_only:
+        pheno = pheno[pheno["dx"] == TDC_DX]
+    else:
+        pheno = pheno[pheno["dx"].isin(ADHD_DX | {TDC_DX})]
 
-    # And download the items
-    total_num_files = len(s3_paths)
-    for path_idx, s3_path in enumerate(s3_paths):
-        rel_path = s3_path.lstrip(s3_prefix)
-        download_file = os.path.join(out_dir, rel_path)
-        download_dir = os.path.dirname(download_file)
-        if not os.path.exists(download_dir):
-            os.makedirs(download_dir)
-        try:
-            if not os.path.exists(download_file):
-                print('Retrieving: {0}'.format(download_file))
-                request.urlretrieve(s3_path, download_file)
-                print('{0:3f}% percent complete'.format(100*(float(path_idx+1)/total_num_files)))
-            else:
-                print('File {0} already exists, skipping...'.format(download_file))
-        except Exception as exc:
-            print('There was a problem downloading {0}.\n Check input arguments and try again.'.format(s3_path))
+    # Sex filter: 'M'=male(1), 'F'=female(0)
+    if sex_filter == "M":
+        pheno = pheno[pheno["sex"] == 1]
+    elif sex_filter == "F":
+        pheno = pheno[pheno["sex"] == 0]
 
-    # Print all done
-    print('Done!')
+    # Binary label: 0=ADHD, 1=TDC
+    pheno["label"] = (pheno["dx"] == TDC_DX).astype(int)
+
+    return pheno.reset_index(drop=True)
 
 
-# Make module executable
-if __name__ == '__main__':
+def list_cpac_subjects():
+    """Return the set of subject IDs present in the CPAC S3 pipeline."""
+    url = (
+        "https://s3.amazonaws.com/fcp-indi"
+        "?prefix=data/Projects/ADHD200/Outputs/cpac/raw_outputs/"
+        "pipeline_adhd200-benchmark/&delimiter=/"
+    )
+    xml = urllib.request.urlopen(url).read().decode()
+    subjects = set()
+    for chunk in xml.split("<Prefix>"):
+        if "_session_1/" in chunk:
+            sid = chunk.split("benchmark/")[1].split("_session_1/")[0]
+            subjects.add(sid.zfill(7))
+    return subjects
 
-    # Import packages
-    import argparse
-    import os
-    import sys
 
-    # Init argument parser
+def download_file(url, dest_path):
+    if os.path.exists(dest_path):
+        print(f"  exists, skipping: {dest_path}")
+        return True
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    try:
+        urllib.request.urlretrieve(url, dest_path)
+        return True
+    except Exception as e:
+        print(f"  FAILED {url}: {e}")
+        if os.path.exists(dest_path):
+            os.remove(dest_path)
+        return False
+
+
+def collect_and_download(out_dir, site_filter=None, sex_filter=None,
+                         adhd_only=False, tdc_only=False):
+    os.makedirs(out_dir, exist_ok=True)
+
+    print("Loading phenotypic data...")
+    pheno = load_phenotypic(site_filter, sex_filter, adhd_only, tdc_only)
+    print(f"  {len(pheno)} subjects pass phenotypic filters "
+          f"({(pheno['label']==0).sum()} ADHD, {(pheno['label']==1).sum()} TDC)")
+
+    print("Listing CPAC subjects on S3...")
+    cpac_subjects = list_cpac_subjects()
+    print(f"  {len(cpac_subjects)} subjects in CPAC pipeline")
+
+    pheno_ids = set(pheno["subject_id"].tolist())
+    matched = sorted(pheno_ids & cpac_subjects)
+    print(f"  {len(matched)} subjects matched to phenotypic data")
+
+    # Save merged phenotypic CSV for matched subjects only
+    pheno_matched = pheno[pheno["subject_id"].isin(matched)].copy()
+    pheno_matched.to_csv(os.path.join(out_dir, "phenotypic.csv"), index=False)
+
+    # Download derivatives
+    total = len(matched) * len(DERIVATIVES)
+    done = 0
+    failed = []
+
+    for subject_id in matched:
+        subject_dir = f"{subject_id}_session_1"
+        for deriv_name, subpaths in DERIVATIVES.items():
+            dest = os.path.join(out_dir, subject_id, f"{deriv_name}.nii.gz")
+            done += 1
+            print(f"[{done}/{total}] {subject_id} / {deriv_name}")
+            success = False
+            for subpath in subpaths:
+                url = f"{CPAC_BASE}/{subject_dir}/{subpath}"
+                if download_file(url, dest):
+                    success = True
+                    break
+            if not success:
+                failed.append((subject_id, deriv_name))
+
+    print(f"\nDone. {done - len(failed)}/{total} files downloaded.")
+    if failed:
+        print(f"Failed ({len(failed)}): {failed}")
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-
-    # Required arguments
-    parser.add_argument('-a', '--asd', required=False, default=False, action='store_true',
-                        help='Only download data for participants with ADHD (Note: flag kept as -a for script compatibility).'
-                             ' Specifying neither or both -a and -c will download data from all participants.')
-    parser.add_argument('-c', '--tdc', required=False, default=False, action='store_true',
-                        help='Only download data for participants who are typically developing controls.'
-                             ' Specifying neither or both -a and -c will download data from all participants.')
-    parser.add_argument('-d', '--derivative', nargs=1, required=True, type=str,
-                        help='Derivative of interest (e.g. \'reho\')')
-    parser.add_argument('-p', '--pipeline', nargs=1, required=True, type=str,
-                        help='Pipeline used to preprocess the data (e.g. \'athena\')')
-    parser.add_argument('-s', '--strategy', nargs=1, required=True, type=str,
-                        help='Noise-removal strategy used during preprocessing (e.g. \'filt_global\')')
-    parser.add_argument('-o', '--out_dir', nargs=1, required=True, type=str,
-                        help='Path to local folder to download files to')
-
-    # Optional arguments
-    parser.add_argument('-lt', '--less_than', nargs=1, required=False,
-                        type=float, help='Upper age threshold (in years) of participants to download')
-    parser.add_argument('-gt', '--greater_than', nargs=1, required=False,
-                        type=int, help='Lower age threshold (in years) of participants to download')
-    parser.add_argument('-t', '--site', nargs=1, required=False, type=str,
-                        help='Site of interest to download from (e.g. \'NYU\')')
-    parser.add_argument('-x', '--sex', nargs=1, required=False, type=str,
-                        help='Participant sex of interest to download only (e.g. \'M\' or \'F\')')
-
-    # Parse and gather arguments
+    parser.add_argument("-o", "--out_dir", required=True,
+                        help="Local directory to save files")
+    parser.add_argument("-t", "--site", default=None,
+                        help="Site filter, e.g. NYU, KKI, Peking_1")
+    parser.add_argument("-x", "--sex", default=None,
+                        help="Sex filter: M or F")
+    parser.add_argument("--adhd-only", action="store_true")
+    parser.add_argument("--tdc-only", action="store_true")
     args = parser.parse_args()
 
-    # Init variables
-    desired_derivative = args.derivative[0].lower()
-    desired_pipeline = args.pipeline[0].lower()
-    desired_strategy = args.strategy[0].lower()
-    download_data_dir = os.path.abspath(args.out_dir[0])
-
-    # Try and init optional arguments
-
-    # for diagnosis if both ADHD and TDC flags are set to true or false, we download both
-    desired_diagnosis = ''
-    if args.tdc == args.asd:
-        desired_diagnosis = 'both'
-        print('Downloading data for ADHD and TDC participants')
-    elif args.tdc:
-        desired_diagnosis = 'tdc'
-        print('Downloading data for TDC participants')
-    elif args.asd:
-        desired_diagnosis = 'asd'
-        print('Downloading data for ADHD participants')
-
-    try:
-        desired_age_max = args.less_than[0]
-        print('Using upper age threshold of {0:d}...'.format(desired_age_max))
-    except TypeError:
-        desired_age_max = 200.0
-        print('No upper age threshold specified')
-
-    try:
-        desired_age_min = args.greater_than[0]
-        print('Using lower age threshold of {0:d}...'.format(desired_age_min))
-    except TypeError:
-        desired_age_min = -1.0
-        print('No lower age threshold specified')
-
-    try:
-        desired_site = args.site[0]
-    except TypeError:
-        desired_site = None
-        print('No site specified, using all sites...')
-
-    try:
-        desired_sex = args.sex[0].upper()
-        if desired_sex == 'M':
-            print('Downloading only male subjects...')
-        elif desired_sex == 'F':
-            print('Downloading only female subjects...')
-        else:
-            print('Please specify \'M\' or \'F\' for sex and try again')
-            sys.exit()
-    except TypeError:
-        desired_sex = None
-        print('No sex specified, using all sexes...')
-
-    # Call the collect and download routine
-    collect_and_download(desired_derivative, desired_pipeline, desired_strategy, download_data_dir, desired_age_max,
-                         desired_age_min, desired_site, desired_sex, desired_diagnosis)
+    collect_and_download(
+        out_dir=os.path.abspath(args.out_dir),
+        site_filter=args.site,
+        sex_filter=args.sex,
+        adhd_only=args.adhd_only,
+        tdc_only=args.tdc_only,
+    )
