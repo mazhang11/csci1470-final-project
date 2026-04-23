@@ -10,7 +10,7 @@
 #SBATCH --mail-user=mara_oancea@brown.edu
 
 # Load Python and activate venv
-module load python/3.11.0
+module load python/3.11.11-5e66
 source ~/csci1470-final-project/venv/bin/activate
 
 cd ~/csci1470-final-project/scripts
