@@ -1,0 +1,10 @@
+mode:            single
+derivative:      gm
+n_repeats:       50
+n_folds:         4
+epochs:          100
+repeats_done:    34/50
+mean_val_acc:    73.2445%
+variance:        9.8078
+best_run:        79.1667%
+all_repeat_means: [np.float64(76.25), np.float64(66.6667), np.float64(76.1458), np.float64(73.3333), np.float64(74.6875), np.float64(72.9167), np.float64(72.8125), np.float64(74.5833), np.float64(73.0208), np.float64(76.1458), np.float64(69.5833), np.float64(71.5625), np.float64(73.125), np.float64(74.6875), np.float64(73.2292), np.float64(73.0208), np.float64(76.1458), np.float64(66.6667), np.float64(68.4375), np.float64(74.5833), np.float64(71.4583), np.float64(69.8958), np.float64(76.1458), np.float64(74.6875), np.float64(76.25), np.float64(79.1667), np.float64(72.9167), np.float64(65.2083), np.float64(72.8125), np.float64(74.7917), np.float64(77.7083), np.float64(72.6042), np.float64(72.9167), np.float64(76.1458)]
