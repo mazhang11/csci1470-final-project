@@ -9,8 +9,9 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=mara_oancea@brown.edu
 
-# Load Python and activate venv
+# Load Python and CUDA, then activate venv
 module load python/3.12.8-zr3c
+module load cuda/12.9.0-cinr
 source ~/csci1470-final-project/venv/bin/activate
 
 cd ~/csci1470-final-project/scripts
