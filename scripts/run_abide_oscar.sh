@@ -4,10 +4,10 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32G
 #SBATCH --cpus-per-task=4
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --output=../outputs_abide/oscar_%j.log
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=luis_ocampo@brown.edu
+#SBATCH --mail-user=mara_oancea@brown.edu
 
 # Load Python and CUDA, then activate venv
 module load python/3.12.8-zr3c
