@@ -7,7 +7,6 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=../outputs/oscar_%j.log
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=${SLURM_MAIL}
 
 # Load Python and CUDA, then activate venv
 module load python/3.12.8-zr3c
