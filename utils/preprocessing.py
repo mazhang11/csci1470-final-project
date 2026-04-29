@@ -18,6 +18,14 @@ def load_nifti(path: str) -> np.ndarray:
 
 
 def center_crop(volume: np.ndarray, target: tuple) -> np.ndarray:
+    pad_width = []
+    for c, t in zip(volume.shape, target):
+        deficit = max(0, t - c)
+        pad_width.append((deficit // 2, deficit - deficit // 2))
+    
+    if any(p != (0, 0) for p in pad_width):
+        volume = np.pad(volume, pad_width, mode="constant")
+    
     starts = [(c - t) // 2 for c, t in zip(volume.shape, target)]
     slices = tuple(slice(s, s + t) for s, t in zip(starts, target))
     return volume[slices]
