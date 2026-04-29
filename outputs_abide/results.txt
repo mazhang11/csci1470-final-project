@@ -1,0 +1,10 @@
+mode:            single
+derivative:      falff
+n_repeats:       1
+n_folds:         4
+epochs:          2
+repeats_done:    1/1
+mean_val_acc:    58.8141%
+variance:        0.0000
+best_run:        58.8141%
+all_repeat_means: [58.8141]
