@@ -263,6 +263,131 @@ def fig5_boxplots(adhd, abide):
     print(f'Saved: {out}')
 
 
+def parse_log_file(log_path):
+    """
+    Parse a SLURM log file and return epoch-level training curves.
+    Returns dict: {experiment_label: {repeat_fold: [{epoch, tr_loss, tr_acc, val_loss, val_acc}]}}
+    """
+    pattern = re.compile(
+        r'repeat=\s*(\d+)/\d+\s+fold=(\d+)/\d+\s+epoch=\s*(\d+)/\d+\s+'
+        r'tr_loss=([\d.]+)\s+tr_acc=([\d.]+)\s+val_loss=([\d.]+)\s+val_acc=([\d.]+)'
+    )
+    # Matches both formats:
+    #   ===== Experiment 1: fALFF (paper target: 62.06%) =====
+    #   ===== ABIDE Experiment 1: fALFF =====
+    exp_pattern = re.compile(r'=====\s+(?:ABIDE\s+)?Experiment\s+\d+:\s+(.+?)(?:\s+\(paper|\s+=====)')
+
+    # First pass: check if any experiment headers exist.
+    raw_text = Path(log_path).read_text()
+    has_headers = bool(exp_pattern.search(raw_text))
+
+    curves = {}
+    # If no headers, dump everything under 'all'.
+    current_exp = None if has_headers else 'all'
+    if not has_headers:
+        curves['all'] = {}
+
+    with open(log_path) as f:
+        for line in f:
+            m = exp_pattern.search(line)
+            if m:
+                raw = m.group(1).strip().lower()
+                current_exp = raw.replace(' ', '_').replace('-', '_').replace('+', '_')
+                curves[current_exp] = {}
+                continue
+            if current_exp is None:
+                continue
+            m = pattern.search(line)
+            if m:
+                repeat, fold, epoch = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                key = f'r{repeat:02d}_f{fold}'
+                if key not in curves[current_exp]:
+                    curves[current_exp][key] = []
+                curves[current_exp][key].append({
+                    'epoch':    epoch,
+                    'tr_loss':  float(m.group(4)),
+                    'tr_acc':   float(m.group(5)),
+                    'val_loss': float(m.group(6)),
+                    'val_acc':  float(m.group(7)),
+                })
+    return curves
+
+
+def fig6_training_curves(log_path, dataset_name):
+    """
+    Average training/validation loss and accuracy over all folds/repeats,
+    then plot mean ± std across epoch checkpoints.
+    """
+    if not Path(log_path).exists():
+        print(f'Fig 6: log not found: {log_path}')
+        return
+
+    curves = parse_log_file(log_path)
+    if not curves:
+        print('Fig 6: no epoch data found in log')
+        return
+
+    # One subplot per experiment found in the log.
+    exps = list(curves.keys())
+    fig, axes = plt.subplots(len(exps), 2, figsize=(13, 4 * len(exps)))
+    if len(exps) == 1:
+        axes = [axes]
+
+    for ax_row, exp in zip(axes, exps):
+        folds = curves[exp]
+        if not folds:
+            continue
+
+        # Collect all epoch checkpoints.
+        all_epochs = sorted(set(r['epoch'] for runs in folds.values() for r in runs))
+
+        tr_accs, val_accs, tr_losses, val_losses = [], [], [], []
+        for ep in all_epochs:
+            ep_tr_acc  = [r['tr_acc']  for runs in folds.values() for r in runs if r['epoch'] == ep]
+            ep_val_acc = [r['val_acc'] for runs in folds.values() for r in runs if r['epoch'] == ep]
+            ep_tr_loss  = [r['tr_loss']  for runs in folds.values() for r in runs if r['epoch'] == ep]
+            ep_val_loss = [r['val_loss'] for runs in folds.values() for r in runs if r['epoch'] == ep]
+            tr_accs.append(ep_tr_acc)
+            val_accs.append(ep_val_acc)
+            tr_losses.append(ep_tr_loss)
+            val_losses.append(ep_val_loss)
+
+        def plot_band(ax, epochs, data, label, color):
+            means = [np.mean(d) for d in data]
+            stds  = [np.std(d)  for d in data]
+            ax.plot(epochs, means, color=color, label=label)
+            ax.fill_between(epochs,
+                            [m-s for m,s in zip(means,stds)],
+                            [m+s for m,s in zip(means,stds)],
+                            alpha=0.2, color=color)
+
+        # Accuracy plot
+        plot_band(ax_row[0], all_epochs, tr_accs,  'Train', 'steelblue')
+        plot_band(ax_row[0], all_epochs, val_accs,  'Val',   'salmon')
+        ax_row[0].set_title(f'{dataset_name} — {exp} — accuracy')
+        ax_row[0].set_xlabel('Epoch')
+        ax_row[0].set_ylabel('Accuracy')
+        ax_row[0].legend()
+        ax_row[0].grid(alpha=0.3)
+
+        # Loss plot
+        plot_band(ax_row[1], all_epochs, tr_losses,  'Train', 'steelblue')
+        plot_band(ax_row[1], all_epochs, val_losses,  'Val',   'salmon')
+        ax_row[1].set_title(f'{dataset_name} — {exp} — loss')
+        ax_row[1].set_xlabel('Epoch')
+        ax_row[1].set_ylabel('Loss')
+        ax_row[1].legend()
+        ax_row[1].grid(alpha=0.3)
+
+    plt.suptitle(f'{dataset_name} — Training Curves (mean ± std across all folds/repeats)', y=1.01)
+    plt.tight_layout()
+    safe = dataset_name.lower().replace('-', '_').replace(' ', '_')
+    out = FIG_DIR / f'fig6_training_curves_{safe}.png'
+    plt.savefig(out, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f'Saved: {out}')
+
+
 if __name__ == '__main__':
     adhd  = load_results(ADHD_DIR,  ['falff', 'reho', 'gm', 'falff_gm_multi'])
     abide = load_results(ABIDE_DIR, ['falff', 'reho', 'gm', 'falff_gm_multi'])
@@ -275,5 +400,11 @@ if __name__ == '__main__':
     fig3_per_repeat_abide(abide)
     fig4_adhd_vs_abide(adhd, abide)
     fig5_boxplots(adhd, abide)
+
+    # Training curves from SLURM log files.
+    adhd_log  = ROOT / 'outputs_oscar' / 'oscar_1961216.log'
+    abide_log = ROOT / 'outputs_abide' / 'oscar_2024580.log'
+    fig6_training_curves(adhd_log,  'ADHD-200')
+    fig6_training_curves(abide_log, 'ABIDE')
 
     print(f'\nAll figures saved to {FIG_DIR}')
