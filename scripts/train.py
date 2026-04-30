@@ -24,6 +24,7 @@ Usage examples:
 """
 
 import argparse
+import csv
 import os
 import sys
 import time
@@ -174,6 +175,16 @@ def run(args):
             optimizer = SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
             scheduler = StepLR(optimizer, step_size=args.lr_step, gamma=args.lr_gamma)
 
+            # Create CSV file for epoch-by-epoch logging
+            epoch_csv_path = os.path.join(
+                args.output_dir,
+                f"training_history_r{repeat:02d}_f{fold}.csv"
+            )
+            csv_file = open(epoch_csv_path, 'w', newline='')
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(['epoch', 'train_loss', 'train_acc', 'val_loss', 'val_acc'])
+            csv_file.flush()
+
             best_val_acc = 0.0
 
             for epoch in range(1, args.epochs + 1):
@@ -184,6 +195,10 @@ def run(args):
                     model, val_loader, loss_fn, device, multi
                 )
                 scheduler.step()
+
+                # Log every epoch to CSV
+                csv_writer.writerow([epoch, tr_loss, tr_acc, val_loss, val_acc])
+                csv_file.flush()
 
                 if val_acc > best_val_acc:
                     best_val_acc = val_acc
@@ -203,6 +218,8 @@ def run(args):
                         f"val_loss={val_loss:.4f}  val_acc={val_acc:.3f}  "
                         f"[{elapsed:.0f}s]"
                     )
+
+            csv_file.close()
 
             fold_accs.append(best_val_acc)
             all_val_accs.append(best_val_acc)
