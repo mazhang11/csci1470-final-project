@@ -24,8 +24,8 @@ import numpy as np
 import pandas as pd
 
 ROOT      = Path(__file__).parent.parent
-ADHD_DIR  = ROOT / 'outputs_oscar' / 'outputs'
-ABIDE_DIR = ROOT / 'outputs_abide' / 'outputs_abide'
+ADHD_DIR  = ROOT / 'outputs_oscar'
+ABIDE_DIR = ROOT / 'outputs_abide'
 FIG_DIR   = ROOT / 'outputs_oscar' / 'figures'
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
