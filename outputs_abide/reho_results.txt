@@ -1,0 +1,10 @@
+mode:            single
+derivative:      reho
+n_repeats:       20
+n_folds:         4
+epochs:          100
+repeats_done:    1/20
+mean_val_acc:    64.6041%
+variance:        0.0000
+best_run:        64.6041%
+all_repeat_means: [np.float64(64.6041)]
