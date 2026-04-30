@@ -1,0 +1,10 @@
+## SLURM PROLOG ###############################################################
+##    Job ID : 2024358
+##  Job Name : adhd_gm_multi
+##  Nodelist : gpu3106
+##      CPUs : 
+##  Mem/Node : 32768 MB
+## Directory : /oscar/home/moancea/csci1470-final-project/scripts
+##   Job Started : Wed Apr 29 07:23:26 PM EDT 2026
+###############################################################################
+===== Experiment 3: GM (paper target: 65.43%) =====

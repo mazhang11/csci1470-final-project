@@ -1,0 +1,10 @@
+mode:            single
+derivative:      falff
+n_repeats:       50
+n_folds:         4
+epochs:          100
+repeats_done:    26/50
+mean_val_acc:    58.1676%
+variance:        1.2184
+best_run:        60.1942%
+all_repeat_means: [np.float64(57.3875), np.float64(59.5156), np.float64(59.033), np.float64(58.2619), np.float64(58.3573), np.float64(56.9094), np.float64(57.4889), np.float64(57.8732), np.float64(59.7079), np.float64(58.4549), np.float64(58.0688), np.float64(58.0681), np.float64(58.0677), np.float64(60.0962), np.float64(58.2589), np.float64(55.9389), np.float64(57.1964), np.float64(57.4919), np.float64(60.1942), np.float64(59.1295), np.float64(56.9102), np.float64(56.811), np.float64(59.9982), np.float64(58.6498), np.float64(57.1975), np.float64(57.2903)]

@@ -1,0 +1,196 @@
+## SLURM PROLOG ###############################################################
+##    Job ID : 1858051
+##  Job Name : adhd_cnn
+##  Nodelist : gpu3005
+##      CPUs : 
+##  Mem/Node : 32768 MB
+## Directory : /oscar/home/moancea/csci1470-final-project/scripts
+##   Job Started : Thu Apr 23 01:57:06 PM EDT 2026
+###############################################################################
+===== Experiment 1: fALFF (paper target: 62.06%) =====
+Device: cuda
+Dataset: 63 subjects  |  mode=single  |  derivative=falff
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 180, in run
+    tr_loss, tr_acc = train_one_epoch(
+                      ^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 75, in train_one_epoch
+    logits = model(volumes)
+             ^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../models/single_modal_3d.py", line 91, in forward
+    x = self.conv_block(x)
+        ^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 725, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 720, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+RuntimeError: cuDNN error: CUDNN_STATUS_INTERNAL_ERROR
+===== Experiment 2: ReHo (paper target: 60.27%) =====
+Device: cuda
+Dataset: 63 subjects  |  mode=single  |  derivative=reho
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 180, in run
+    tr_loss, tr_acc = train_one_epoch(
+                      ^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 75, in train_one_epoch
+    logits = model(volumes)
+             ^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../models/single_modal_3d.py", line 91, in forward
+    x = self.conv_block(x)
+        ^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 725, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 720, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+===== Experiment 3: GM (paper target: 65.43%) =====
+Device: cuda
+Dataset: 63 subjects  |  mode=single  |  derivative=gm
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 180, in run
+    tr_loss, tr_acc = train_one_epoch(
+                      ^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 75, in train_one_epoch
+    logits = model(volumes)
+             ^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../models/single_modal_3d.py", line 91, in forward
+    x = self.conv_block(x)
+        ^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 725, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 720, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+===== Experiment 4: Multi-modal fALFF+GM (paper target: 69.15%) =====
+Device: cuda
+Dataset: 63 subjects  |  mode=multi  |  derivative=falff+gm
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 180, in run
+    tr_loss, tr_acc = train_one_epoch(
+                      ^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 71, in train_one_epoch
+    logits = model(fmri, smri)
+             ^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../models/multi_modal_3d.py", line 29, in forward
+    f_feat = self.fmri_branch.get_features(fmri)  # (B, 512)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../models/single_modal_3d.py", line 102, in get_features
+    x = self.conv_block(x)
+        ^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 725, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/venv/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 720, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+RuntimeError: CUDA error: an illegal memory access was encountered
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

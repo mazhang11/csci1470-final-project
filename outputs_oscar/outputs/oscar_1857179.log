@@ -1,0 +1,105 @@
+## SLURM PROLOG ###############################################################
+##    Job ID : 1857179
+##  Job Name : adhd_cnn
+##  Nodelist : gpu2102
+##      CPUs : 
+##  Mem/Node : 32768 MB
+## Directory : /oscar/home/moancea/csci1470-final-project/scripts
+##   Job Started : Thu Apr 23 01:37:45 PM EDT 2026
+###############################################################################
+Lmod has detected the following error: The following module(s) are unknown:
+"python/3.11.0"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "python/3.11.0"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+===== Experiment 1: fALFF (paper target: 62.06%) =====
+/oscar/home/moancea/csci1470-final-project/venv/lib/python3.13/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12090). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Device: cpu
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+    ~~~^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 128, in run
+    dataset = build_datasets(
+        args.data_dir,
+    ...<3 lines>...
+        multi_modal=multi,
+    )
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/dataset.py", line 100, in build_datasets
+    pheno = load_phenotypic(data_dir)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/preprocessing.py", line 72, in load_phenotypic
+    raise FileNotFoundError(
+    ...<2 lines>...
+    )
+FileNotFoundError: phenotypic.csv not found in ../data/raw. Run scripts/run_downloads.sh first.
+===== Experiment 2: ReHo (paper target: 60.27%) =====
+/oscar/home/moancea/csci1470-final-project/venv/lib/python3.13/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12090). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Device: cpu
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+    ~~~^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 128, in run
+    dataset = build_datasets(
+        args.data_dir,
+    ...<3 lines>...
+        multi_modal=multi,
+    )
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/dataset.py", line 100, in build_datasets
+    pheno = load_phenotypic(data_dir)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/preprocessing.py", line 72, in load_phenotypic
+    raise FileNotFoundError(
+    ...<2 lines>...
+    )
+FileNotFoundError: phenotypic.csv not found in ../data/raw. Run scripts/run_downloads.sh first.
+===== Experiment 3: GM (paper target: 65.43%) =====
+/oscar/home/moancea/csci1470-final-project/venv/lib/python3.13/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12090). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Device: cpu
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+    ~~~^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 128, in run
+    dataset = build_datasets(
+        args.data_dir,
+    ...<3 lines>...
+        multi_modal=multi,
+    )
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/dataset.py", line 100, in build_datasets
+    pheno = load_phenotypic(data_dir)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/preprocessing.py", line 72, in load_phenotypic
+    raise FileNotFoundError(
+    ...<2 lines>...
+    )
+FileNotFoundError: phenotypic.csv not found in ../data/raw. Run scripts/run_downloads.sh first.
+===== Experiment 4: Multi-modal fALFF+GM (paper target: 69.15%) =====
+/oscar/home/moancea/csci1470-final-project/venv/lib/python3.13/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12090). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Device: cpu
+Traceback (most recent call last):
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 274, in <module>
+    run(args)
+    ~~~^^^^^^
+  File "/oscar/home/moancea/csci1470-final-project/scripts/train.py", line 128, in run
+    dataset = build_datasets(
+        args.data_dir,
+    ...<3 lines>...
+        multi_modal=multi,
+    )
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/dataset.py", line 100, in build_datasets
+    pheno = load_phenotypic(data_dir)
+  File "/oscar/home/moancea/csci1470-final-project/scripts/../utils/preprocessing.py", line 72, in load_phenotypic
+    raise FileNotFoundError(
+    ...<2 lines>...
+    )
+FileNotFoundError: phenotypic.csv not found in ../data/raw. Run scripts/run_downloads.sh first.
