@@ -1,0 +1,9 @@
+mode:            single
+derivative:      falff
+n_repeats:       2
+n_folds:         4
+epochs:          5
+mean_val_acc:    54.9479%
+variance:        0.6104
+best_run:        55.7292%
+all_repeat_means: [np.float64(55.7292), np.float64(54.1667)]

@@ -1,0 +1,10 @@
+mode:            single
+derivative:      reho
+n_repeats:       50
+n_folds:         4
+epochs:          100
+repeats_done:    50/50
+mean_val_acc:    71.9833%
+variance:        20.4614
+best_run:        82.2917%
+all_repeat_means: [np.float64(71.3542), np.float64(71.4583), np.float64(82.2917), np.float64(77.7083), np.float64(70.0), np.float64(72.9167), np.float64(71.3542), np.float64(76.25), np.float64(63.4375), np.float64(68.3333), np.float64(68.2292), np.float64(66.875), np.float64(66.7708), np.float64(68.3333), np.float64(77.9167), np.float64(74.5833), np.float64(73.0208), np.float64(72.9167), np.float64(60.2083), np.float64(65.1042), np.float64(69.7917), np.float64(69.7917), np.float64(71.3542), np.float64(76.3542), np.float64(74.6875), np.float64(76.25), np.float64(71.3542), np.float64(76.5625), np.float64(79.2708), np.float64(76.25), np.float64(69.6875), np.float64(69.6875), np.float64(68.2292), np.float64(68.2292), np.float64(68.5417), np.float64(66.6667), np.float64(74.7917), np.float64(66.5625), np.float64(76.1458), np.float64(79.2708), np.float64(71.4583), np.float64(76.25), np.float64(71.5625), np.float64(74.5833), np.float64(78.0208), np.float64(74.8958), np.float64(75.8333), np.float64(66.5625), np.float64(73.125), np.float64(68.3333)]
