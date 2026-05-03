@@ -122,6 +122,16 @@ def run(args):
         else "cpu"
     )
     print(f"Device: {device}")
+    print(f"torch.__version__ = {torch.__version__}")
+    print(f"torch.version.cuda = {torch.version.cuda}")
+    print(f"torch.backends.cudnn.version() = {torch.backends.cudnn.version()}")
+    print(f"torch.cuda.is_available() = {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        print(f"cuda device count = {torch.cuda.device_count()}")
+        print(f"cuda current device = {torch.cuda.current_device()}")
+        print(f"cuda device name = {torch.cuda.get_device_name(torch.cuda.current_device())}")
+    if device.type == "cpu" and torch.cuda.is_available():
+        print("Warning: CUDA is available but the selected device is CPU.")
 
     multi = args.mode == "multi"
 
