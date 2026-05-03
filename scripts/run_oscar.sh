@@ -38,6 +38,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/falff
 
 echo "===== Experiment 2: ReHo (paper target: 60.27%) ====="
@@ -47,6 +50,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/reho
 
 echo "===== Experiment 3: GM (paper target: 65.43%) ====="
@@ -56,6 +62,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/gm
 
 echo "===== Experiment 4: Multi-modal fALFF+GM (paper target: 69.15%) ====="
@@ -66,4 +75,7 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/falff_gm_multi

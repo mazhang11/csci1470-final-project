@@ -48,6 +48,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs_abide/falff
 
 echo "===== ABIDE Experiment 2: ReHo ====="
@@ -58,6 +61,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs_abide/reho
 
 echo "===== ABIDE Experiment 3: GM ====="
@@ -68,6 +74,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs_abide/gm
 
 echo "===== ABIDE Experiment 4: Multi-modal fALFF+GM ====="
@@ -79,4 +88,7 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs_abide/falff_gm_multi

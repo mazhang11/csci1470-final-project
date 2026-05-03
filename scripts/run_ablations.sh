@@ -39,6 +39,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/ablations/falff
 
 echo "===== Ablation 2: GM single-modal ====="
@@ -48,6 +51,9 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/ablations/gm
 
 echo "===== Ablation 3: Multi-modal fALFF+GM ====="
@@ -58,4 +64,7 @@ python train.py \
     --n-repeats 50 \
     --epochs 100 \
     --batch-size 20 \
+    --num-workers 4 \
+    --pin-memory \
+    --cache-data \
     --output-dir ../outputs/ablations/falff_gm_multi

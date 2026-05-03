@@ -142,6 +142,7 @@ def run(args):
         fmri_derivative=args.fmri_derivative,
         smri_derivative=args.smri_derivative,
         multi_modal=multi,
+        cache_in_memory=args.cache_data,
     )
     n = len(dataset)
     indices = np.arange(n)
@@ -172,13 +173,17 @@ def run(args):
                 batch_size=args.batch_size,
                 shuffle=True,
                 drop_last=True,   # keeps BN happy — never a batch of 1
-                num_workers=0,
+                num_workers=args.num_workers,
+                pin_memory=args.pin_memory and device.type == "cuda",
+                persistent_workers=(args.num_workers > 0),
             )
             val_loader = DataLoader(
                 val_subset,
                 batch_size=args.batch_size,
                 shuffle=False,
-                num_workers=0,
+                num_workers=args.num_workers,
+                pin_memory=args.pin_memory and device.type == "cuda",
+                persistent_workers=(args.num_workers > 0),
             )
 
             model = get_model(args).to(device)
@@ -292,6 +297,12 @@ if __name__ == "__main__":
     parser.add_argument("--n-folds",    type=int,   default=4)
     parser.add_argument("--epochs",     type=int,   default=100)
     parser.add_argument("--batch-size", type=int,   default=8)
+    parser.add_argument("--num-workers", type=int,   default=4,
+                        help="Number of DataLoader worker processes")
+    parser.add_argument("--pin-memory", action="store_true",
+                        help="Enable DataLoader pin_memory when using CUDA")
+    parser.add_argument("--cache-data", action="store_true",
+                        help="Preload all dataset tensors into memory before training")
     parser.add_argument("--lr",         type=float, default=0.0001)
     parser.add_argument("--momentum",   type=float, default=0.9)
     parser.add_argument("--lr-step",    type=int,   default=20)

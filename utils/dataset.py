@@ -16,26 +16,38 @@ class ADHDDataset(Dataset):
     """
 
     def __init__(self, subject_ids: list[str], file_map: dict, labels: dict,
-                 derivative: str, transform=None):
+                 derivative: str, transform=None, cache_in_memory: bool = False):
         """
         subject_ids — ordered list of subject IDs to include
         file_map    — { subject_id: { derivative: path } }
         labels      — { subject_id: int }
         derivative  — which feature to load: 'falff', 'reho', or 'gm'
         transform   — optional callable applied to the tensor after preprocessing
+        cache_in_memory — if True, preload all tensors into memory once
         """
         self.derivative = derivative
         self.transform = transform
+        self.cache_in_memory = cache_in_memory
         self.samples = [
             (file_map[sid][derivative], labels[sid])
             for sid in subject_ids
             if sid in file_map and derivative in file_map[sid]
         ]
 
+        self.cached_samples = []
+        if self.cache_in_memory:
+            for path, label in self.samples:
+                tensor = preprocess_volume(path, self.derivative)
+                if self.transform:
+                    tensor = self.transform(tensor)
+                self.cached_samples.append((tensor, label))
+
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
+        if self.cache_in_memory:
+            return self.cached_samples[idx]
         path, label = self.samples[idx]
         tensor = preprocess_volume(path, self.derivative)
         if self.transform:
@@ -55,10 +67,11 @@ class ADHDMultiModalDataset(Dataset):
 
     def __init__(self, subject_ids: list[str], file_map: dict, labels: dict,
                  fmri_derivative: str = "falff", smri_derivative: str = "gm",
-                 transform=None):
+                 transform=None, cache_in_memory: bool = False):
         self.fmri_derivative = fmri_derivative
         self.smri_derivative = smri_derivative
         self.transform = transform
+        self.cache_in_memory = cache_in_memory
         self.samples = [
             (file_map[sid][fmri_derivative], file_map[sid][smri_derivative], labels[sid])
             for sid in subject_ids
@@ -67,10 +80,22 @@ class ADHDMultiModalDataset(Dataset):
             and smri_derivative in file_map[sid]
         ]
 
+        self.cached_samples = []
+        if self.cache_in_memory:
+            for fmri_path, smri_path, label in self.samples:
+                fmri = preprocess_volume(fmri_path, self.fmri_derivative)
+                smri = preprocess_volume(smri_path, self.smri_derivative)
+                if self.transform:
+                    fmri = self.transform(fmri)
+                    smri = self.transform(smri)
+                self.cached_samples.append((fmri, smri, label))
+
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
+        if self.cache_in_memory:
+            return self.cached_samples[idx]
         fmri_path, smri_path, label = self.samples[idx]
         fmri = preprocess_volume(fmri_path, self.fmri_derivative)
         smri = preprocess_volume(smri_path, self.smri_derivative)
@@ -86,7 +111,8 @@ def build_datasets(data_dir: str,
                    smri_derivative: str = "gm",
                    multi_modal: bool = False,
                    subject_ids: list[str] | None = None,
-                   transform=None):
+                   transform=None,
+                   cache_in_memory: bool = False):
     """
     Convenience function: loads phenotypic CSV and file map, returns a
     single Dataset ready to hand to a DataLoader or cross-validation splitter.
@@ -114,9 +140,11 @@ def build_datasets(data_dir: str,
             fmri_derivative=fmri_derivative,
             smri_derivative=smri_derivative,
             transform=transform,
+            cache_in_memory=cache_in_memory,
         )
     return ADHDDataset(
         subject_ids, file_map, labels,
         derivative=derivative,
         transform=transform,
+        cache_in_memory=cache_in_memory,
     )
